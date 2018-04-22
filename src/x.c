@@ -27,6 +27,11 @@ static xcb_window_t last_focused = XCB_NONE;
 /* Stores coordinates to warp mouse pointer to if set */
 static Rect *warp_to;
 
+int border_top_size = 2;
+int border_bottom_size = 0;
+int border_left_size = 0;
+int border_right_size = 0;
+
 /*
  * Describes the X11 state we may modify (map state, position, window stack).
  * There is one entry per container. The state represents the current situation
@@ -362,19 +367,19 @@ static void x_draw_title_border(Con *con, struct deco_render_params *p) {
 
     /* Left */
     draw_util_rectangle(&(con->parent->frame_buffer), p->color->border,
-                        dr->x, dr->y, 1, dr->height);
+                        dr->x, dr->y, border_left_size, dr->height);
 
     /* Right */
     draw_util_rectangle(&(con->parent->frame_buffer), p->color->border,
-                        dr->x + dr->width - 1, dr->y, 1, dr->height);
+                        dr->x + dr->width - border_right_size, dr->y, border_right_size, dr->height);
 
     /* Top */
     draw_util_rectangle(&(con->parent->frame_buffer), p->color->border,
-                        dr->x, dr->y, dr->width, 1);
+                        dr->x, dr->y, dr->width, border_top_size);
 
     /* Bottom */
     draw_util_rectangle(&(con->parent->frame_buffer), p->color->border,
-                        dr->x, dr->y + dr->height - 1, dr->width, 1);
+                        dr->x, dr->y + dr->height - border_bottom_size, dr->width, border_bottom_size);
 }
 
 static void x_draw_decoration_after_title(Con *con, struct deco_render_params *p) {
@@ -390,9 +395,9 @@ static void x_draw_decoration_after_title(Con *con, struct deco_render_params *p
          * distance we keep from the edge (not the entire border width).
          * Redrawing the entire border would cause text to be cut off. */
         draw_util_rectangle(&(con->parent->frame_buffer), p->color->background,
-                            dr->x + dr->width - 2 * logical_px(1),
+                            dr->x + dr->width - (border_left_size + border_right_size) * logical_px(1),
                             dr->y,
-                            2 * logical_px(1),
+                            (border_left_size + border_right_size) * logical_px(1),
                             dr->height);
     }
 
