@@ -77,6 +77,8 @@ xcb_colormap_t colormap;
 /* Overall height of the bar (based on font size) */
 int bar_height;
 
+int bar_padding;
+
 /* These are only relevant for XKB, which we only need for grabbing modifiers */
 int xkb_base;
 bool mod_pressed = 0;
@@ -189,7 +191,7 @@ static void draw_separator(i3_output *output, uint32_t x, struct status_block *b
         /* Draw a custom separator. */
         uint32_t separator_x = MAX(x - block->sep_block_width, center_x - separator_symbol_width / 2);
         draw_util_text(config.separator_symbol, &output->statusline_buffer, sep_fg, bar_bg,
-                       separator_x, logical_px(ws_voff_px), x - separator_x);
+                       separator_x, bar_padding, x - separator_x);
     }
 }
 
@@ -314,7 +316,7 @@ void draw_statusline(i3_output *output, uint32_t clip_left, bool use_focus_color
         }
 
         draw_util_text(text, &output->statusline_buffer, fg_color, bg_color,
-                       x + render->x_offset + border_width, logical_px(ws_voff_px),
+                       x + render->x_offset + border_width, bar_padding,
                        render->width - 2 * border_width);
         x += full_render_width;
 
@@ -486,7 +488,7 @@ void handle_button(xcb_button_press_event_t *event) {
     i3_ws *cur_ws = NULL, *clicked_ws = NULL, *ws_walk;
 
     TAILQ_FOREACH(ws_walk, walk->workspaces, tailq) {
-        int w = 2 * logical_px(ws_hoff_px) + 2 * logical_px(1) + ws_walk->name_width;
+        int w = workspace_button_width(ws_walk);
         if (x >= workspace_width && x <= workspace_width + w)
             clicked_ws = ws_walk;
         if (ws_walk->visible)
@@ -1299,7 +1301,11 @@ void init_xcb_late(char *fontname) {
     font = load_font(fontname, true);
     set_font(&font);
     DLOG("Calculated font height: %d\n", font.height);
-    bar_height = font.height + 2 * logical_px(ws_voff_px);
+    bar_height = logical_px(config.height);
+    if (bar_height == 0) {
+        bar_height = font.height + 2 * logical_px(ws_voff_px);
+    }
+    bar_padding = (bar_height - font.height) / 2;
     icon_size = bar_height - 2 * logical_px(config.tray_padding);
 
     if (config.separator_symbol)
@@ -1894,6 +1900,22 @@ void reconfig_windows(bool redraw_bars) {
     }
 }
 
+int workspace_button_width(i3_ws *ws) {
+    int width = ws->name_width + 2 * logical_px(ws_hoff_px) + 2 * logical_px(1);
+    if (width < bar_height) {
+        width = bar_height;
+    }
+    return width;
+}
+
+int binding_button_width(mode binding) {
+    int width = binding.width + 2 * logical_px(ws_hoff_px) + 2 * logical_px(1);
+    if (width < bar_height) {
+        width = bar_height;
+    }
+    return width;
+}
+
 /*
  * Render the bars, with buttons and statusline
  *
@@ -1949,26 +1971,28 @@ void draw_bars(bool unhide) {
                     unhide = true;
                 }
 
+                int width = workspace_button_width(ws_walk);
+
                 /* Draw the border of the button. */
                 draw_util_rectangle(&(outputs_walk->buffer), border_color,
                                     workspace_width,
                                     logical_px(1),
-                                    ws_walk->name_width + 2 * logical_px(ws_hoff_px) + 2 * logical_px(1),
-                                    font.height + 2 * logical_px(ws_voff_px) - 2 * logical_px(1));
+                                    width,
+                                    bar_height - 2 * logical_px(1));
 
                 /* Draw the inside of the button. */
                 draw_util_rectangle(&(outputs_walk->buffer), bg_color,
                                     workspace_width + logical_px(1),
                                     2 * logical_px(1),
-                                    ws_walk->name_width + 2 * logical_px(ws_hoff_px),
-                                    font.height + 2 * logical_px(ws_voff_px) - 4 * logical_px(1));
+                                    width - 2 * logical_px(1),
+                                    bar_height - 4 * logical_px(1));
 
                 draw_util_text(ws_walk->name, &(outputs_walk->buffer), fg_color, bg_color,
-                               workspace_width + logical_px(ws_hoff_px) + logical_px(1),
-                               logical_px(ws_voff_px),
+                               workspace_width + (width - ws_walk->name_width) / 2,
+                               bar_padding,
                                ws_walk->name_width);
 
-                workspace_width += 2 * logical_px(ws_hoff_px) + 2 * logical_px(1) + ws_walk->name_width;
+                workspace_width += width;
                 if (TAILQ_NEXT(ws_walk, tailq) != NULL)
                     workspace_width += logical_px(ws_spacing_px);
             }
@@ -1980,25 +2004,27 @@ void draw_bars(bool unhide) {
             color_t fg_color = colors.binding_mode_fg;
             color_t bg_color = colors.binding_mode_bg;
 
+            int buttton_width = binding_button_width(binding);
+
             draw_util_rectangle(&(outputs_walk->buffer), colors.binding_mode_border,
                                 workspace_width,
                                 logical_px(1),
-                                binding.width + 2 * logical_px(ws_hoff_px) + 2 * logical_px(1),
-                                font.height + 2 * logical_px(ws_voff_px) - 2 * logical_px(1));
+                                buttton_width,
+                                bar_height - 2 * logical_px(1));
 
             draw_util_rectangle(&(outputs_walk->buffer), bg_color,
                                 workspace_width + logical_px(1),
                                 2 * logical_px(1),
-                                binding.width + 2 * logical_px(ws_hoff_px),
-                                font.height + 2 * logical_px(ws_voff_px) - 4 * logical_px(1));
+                                buttton_width - 2 * logical_px(1),
+                                bar_height - 4 * logical_px(1));
 
             draw_util_text(binding.name, &(outputs_walk->buffer), fg_color, bg_color,
-                           workspace_width + logical_px(ws_hoff_px) + logical_px(1),
-                           logical_px(ws_voff_px),
+                           workspace_width + (buttton_width - binding.width) / 2,
+                           bar_padding,
                            binding.width);
 
             unhide = true;
-            workspace_width += 2 * logical_px(ws_hoff_px) + 2 * logical_px(1) + binding.width;
+            workspace_width += buttton_width;
         }
 
         if (!TAILQ_EMPTY(&statusline_head)) {

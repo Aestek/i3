@@ -61,6 +61,7 @@ typedef struct config_t {
     TAILQ_HEAD(tray_outputs_head, tray_output_t)
     tray_outputs;
 
+    int height;
     int tray_padding;
     int num_outputs;
     char **outputs;
