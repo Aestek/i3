@@ -2249,11 +2249,23 @@ char *con_get_tree_representation(Con *con) {
     return complete_buf;
 }
 
+i3String *con_get_title(Con *con) {
+    i3Window *win = con->window;
+
+    char *title_var;
+    if (win == NULL) {
+        title_var = con_get_tree_representation(con);
+    } else {
+        title_var = sstrdup((win->name == NULL) ? "" : i3string_as_utf8(win->name));
+    }
+    return con->title_format == NULL ? i3string_from_utf8(title_var) : con_parse_title_format(con, title_var);
+}
+
 /*
  * Returns the container's title considering the current title format.
  *
  */
-i3String *con_parse_title_format(Con *con) {
+i3String *con_parse_title_format(Con *con, char *title) {
     assert(con->title_format != NULL);
 
     i3Window *win = con->window;
@@ -2262,18 +2274,17 @@ i3String *con_parse_title_format(Con *con) {
      * is used by the current font. */
     const bool pango_markup = font_is_pango();
 
-    char *title;
     char *class;
     char *instance;
     if (win == NULL) {
-        title = pango_escape_markup(con_get_tree_representation(con));
         class = sstrdup("i3-frame");
         instance = sstrdup("i3-frame");
     } else {
-        title = pango_escape_markup(sstrdup((win->name == NULL) ? "" : i3string_as_utf8(win->name)));
         class = pango_escape_markup(sstrdup((win->class_class == NULL) ? "" : win->class_class));
         instance = pango_escape_markup(sstrdup((win->class_instance == NULL) ? "" : win->class_instance));
     }
+
+    title = pango_escape_markup(title);
 
     placeholder_t placeholders[] = {
         {.name = "%title", .value = title},

@@ -79,7 +79,7 @@ void window_update_name(i3Window *win, xcb_get_property_reply_t *prop, bool befo
 
     Con *con = con_by_window_id(win->id);
     if (con != NULL && con->title_format != NULL) {
-        i3String *name = con_parse_title_format(con);
+        i3String *name = con_get_title(con);
         ewmh_update_visible_name(win->id, i3string_as_utf8(name));
         I3STRING_FREE(name);
     }
@@ -124,7 +124,7 @@ void window_update_name_legacy(i3Window *win, xcb_get_property_reply_t *prop, bo
 
     Con *con = con_by_window_id(win->id);
     if (con != NULL && con->title_format != NULL) {
-        i3String *name = con_parse_title_format(con);
+        i3String *name = con_get_title(con);
         ewmh_update_visible_name(win->id, i3string_as_utf8(name));
         I3STRING_FREE(name);
     }

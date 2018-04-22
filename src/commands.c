@@ -1927,7 +1927,7 @@ void cmd_title_format(I3_CMD, const char *format) {
             current->con->title_format = sstrdup(format);
 
             if (current->con->window != NULL) {
-                i3String *formatted_title = con_parse_title_format(current->con);
+                i3String *formatted_title = con_get_title(current->con);
                 ewmh_update_visible_name(current->con->window->id, i3string_as_utf8(formatted_title));
                 I3STRING_FREE(formatted_title);
             }
