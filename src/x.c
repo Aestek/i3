@@ -28,7 +28,7 @@ static xcb_window_t last_focused = XCB_NONE;
 static Rect *warp_to;
 
 int border_top_size = 0;
-int border_bottom_size = 2;
+int border_bottom_size = 3;
 int border_left_size = 0;
 int border_right_size = 0;
 
