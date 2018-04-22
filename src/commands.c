@@ -1983,6 +1983,24 @@ void cmd_title_align(I3_CMD, const char *direction) {
 }
 
 /*
+ * Implementation of 'title_height <height>'
+ *
+ */
+void cmd_title_height(I3_CMD, long height) {
+    DLOG("setting title_height to \"%ld\"\n", height);
+    HANDLE_EMPTY_MATCH;
+
+    owindow *current;
+    TAILQ_FOREACH(current, &owindows, owindows) {
+        DLOG("setting title_height for %p / %s\n", current->con, current->con->name);
+        config.title_height = height;
+    }
+
+    cmd_output->needs_tree_render = true;
+    ysuccess(true);
+}
+
+/*
  * Implementation of 'rename workspace [<name>] to <name>'
  *
  */

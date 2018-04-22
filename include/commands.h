@@ -309,6 +309,12 @@ void cmd_title_format(I3_CMD, const char *format);
 void cmd_title_align(I3_CMD, const char *direction);
 
 /**
+ * Implementation of 'title_height <height>'
+ *
+ */
+void cmd_title_height(I3_CMD, long height);
+
+/**
  * Implementation of 'rename workspace <name> to <name>'
  *
  */

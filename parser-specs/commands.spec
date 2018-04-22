@@ -41,6 +41,7 @@ state INITIAL:
   'swap' -> SWAP
   'title_format' -> TITLE_FORMAT
   'title_align' -> TITLE_ALIGN
+  'title_height' -> TITLE_HEIGHT
   'mode' -> MODE
   'bar' -> BAR
 
@@ -436,6 +437,10 @@ state TITLE_FORMAT:
 state TITLE_ALIGN:
   direction = 'left', 'center', 'right'
       -> call cmd_title_align($direction)
+
+state TITLE_HEIGHT:
+  height = number
+      -> call cmd_title_height(&height)
 
 # bar (hidden_state hide|show|toggle)|(mode dock|hide|invisible|toggle) [<bar_id>]
 state BAR:

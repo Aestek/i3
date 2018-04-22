@@ -97,6 +97,8 @@ struct Config {
     const char *terminal;
     i3Font font;
 
+    int title_height;
+
     char *ipc_socket_path;
     char *restart_state_path;
 
