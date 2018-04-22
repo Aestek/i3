@@ -27,6 +27,11 @@ static xcb_window_t last_focused = XCB_NONE;
 /* Stores coordinates to warp mouse pointer to if set */
 static Rect *warp_to;
 
+int border_top_size = 0;
+int border_bottom_size = 2;
+int border_left_size = 0;
+int border_right_size = 0;
+
 /*
  * Describes the X11 state we may modify (map state, position, window stack).
  * There is one entry per container. The state represents the current situation
@@ -348,10 +353,10 @@ static void x_draw_title_border(Con *con, struct deco_render_params *p) {
     }
 
     draw_util_rectangle(&(con->parent->frame_buffer), p->color->border,
-                        dr->x, dr->y, dr->width, 1);
+                        dr->x, dr->y, dr->width, border_top_size);
 
     draw_util_rectangle(&(con->parent->frame_buffer), p->color->border,
-                        dr->x + deco_diff_l, dr->y + dr->height - 1, dr->width - (deco_diff_l + deco_diff_r), 1);
+                        dr->x + deco_diff_l, dr->y + dr->height - border_bottom_size, dr->width - (deco_diff_l + deco_diff_r), border_bottom_size);
 }
 
 static void x_draw_decoration_after_title(Con *con, struct deco_render_params *p) {
@@ -378,11 +383,11 @@ static void x_draw_decoration_after_title(Con *con, struct deco_render_params *p
     if (con->parent->layout == L_TABBED) {
         /* Left side */
         draw_util_rectangle(&(con->parent->frame_buffer), p->color->border,
-                            dr->x, dr->y, 1, dr->height);
+                            dr->x, dr->y, border_left_size, dr->height);
 
         /* Right side */
         draw_util_rectangle(&(con->parent->frame_buffer), p->color->border,
-                            dr->x + dr->width - 1, dr->y, 1, dr->height);
+                            dr->x + dr->width - border_right_size, dr->y, 1, dr->height);
     }
 
     /* Redraw the border. */
