@@ -88,26 +88,28 @@ bool match_matches_window(Match *match, i3Window *window) {
     LOG("Checking window 0x%08x (class %s)\n", window->id, window->class_class);
 
     if (match->class != NULL) {
-        if (window->class_class == NULL)
-            return false;
+        char *against = window->class_class;
+        if (against == NULL)
+            against = "";
         if (strcmp(match->class->pattern, "__focused__") == 0 &&
             strcmp(window->class_class, focused->window->class_class) == 0) {
             LOG("window class matches focused window\n");
-        } else if (regex_matches(match->class, window->class_class)) {
-            LOG("window class matches (%s)\n", window->class_class);
+        } else if (regex_matches(match->class, against)) {
+            LOG("window class matches (%s)\n", against);
         } else {
             return false;
         }
     }
 
     if (match->instance != NULL) {
+        char *against = window->class_instance;
         if (window->class_instance == NULL)
-            return false;
+            against = "";
         if (strcmp(match->instance->pattern, "__focused__") == 0 &&
             strcmp(window->class_instance, focused->window->class_instance) == 0) {
             LOG("window instance matches focused window\n");
-        } else if (regex_matches(match->instance, window->class_instance)) {
-            LOG("window instance matches (%s)\n", window->class_instance);
+        } else if (regex_matches(match->instance, against)) {
+            LOG("window instance matches (%s)\n", against);
         } else {
             return false;
         }
