@@ -631,9 +631,22 @@ void x_draw_decoration(Con *con) {
         goto copy_pixmaps;
     }
 
+    int left;
+    switch (con->align) {
+        case ALIGN_LEFT:
+            left = logical_px(2);
+            break;
+        case ALIGN_CENTER:
+            left = max(0, con->deco_rect.width / 2 - predict_text_width(title) / 2);
+            break;
+        case ALIGN_RIGHT:
+            left = max(0, con->deco_rect.width - predict_text_width(title) - logical_px(2));
+            break;
+    }
+
     draw_util_text(title, &(parent->frame_buffer),
                    p->color->text, p->color->background,
-                   con->deco_rect.x + logical_px(2),
+                   left + con->deco_rect.x,
                    con->deco_rect.y + text_offset_y,
                    con->deco_rect.width - mark_width - 2 * logical_px(2));
 
